@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from storage_tool.S3 import S3Storage, S3Authorization
+from storage_tool.s3 import S3Storage, S3Authorization
 
 from storage_tool import Storage, Auth
 

@@ -3,8 +3,8 @@ import json
 from unittest.mock import Mock, patch
 
 
-from storage_tool.S3 import S3Storage
-from storage_tool.S3 import S3Authorization
+from storage_tool.s3 import S3Storage
+from storage_tool.s3 import S3Authorization
 import pandas as pd
 
 with open('secrets/secret_aws.json') as json_file:
@@ -12,7 +12,6 @@ with open('secrets/secret_aws.json') as json_file:
     KEY = data['KEY']
     SECRET = data['SECRET']
     REGION = data['REGION']
-
 
 
 def test_s3_authorization():
@@ -37,7 +36,7 @@ def test_s3_authorization():
 def test_set_repository_existente(monkeypatch):
     # Simular a resposta da função list_repositories
     repositories_mock = [{"repository": "Repo1"}, {"repository": "Repo2"}]
-    monkeypatch.setattr('storage_tool.S3.S3Storage.list_repositories', lambda _: repositories_mock)
+    monkeypatch.setattr('storage_tool.s3.S3Storage.list_repositories', lambda _: repositories_mock)
 
     # Instanciar a classe
     auth = S3Authorization()
@@ -51,7 +50,7 @@ def test_set_repository_existente(monkeypatch):
 def test_set_repository_inexistente(monkeypatch):
     # Simular a resposta da função list_repositories
     repositories_mock = [{"repository": "Repo1"}, {"repository": "Repo2"}]
-    monkeypatch.setattr('storage_tool.S3.S3Storage.list_repositories', lambda _: repositories_mock)
+    monkeypatch.setattr('storage_tool.s3.S3Storage.list_repositories', lambda _: repositories_mock)
 
     # Instanciar a classe
     auth = S3Authorization()
