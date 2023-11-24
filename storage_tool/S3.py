@@ -75,7 +75,6 @@ class S3Storage(BaseStorage, DataProcessor):
 
         response = self.s3_client.list_objects_v2(
             Bucket=self.repository,
-            Prefix=path
         )
         list_files = []
 
@@ -83,8 +82,14 @@ class S3Storage(BaseStorage, DataProcessor):
             raise Exception('Error while listing files')
 
         for file in response['Contents']:
-            list_files.append({"file": file['Key'], "size": file['Size'], "last_modified": file['LastModified']})
-
+            # If key is first level append to list
+            if len(file['Key'].split('/')) >1:
+                list_files.append({"object": f"{file['Key'].split('/')[0]}/", "type": "folder"})
+            else:  
+                list_files.append({"object": file['Key'], "type": "file"})
+        # Return unique items
+        list_files = [dict(t) for t in {tuple(d.items()) for d in list_files}]
+    
         return list_files
 
     def read(self, file_path, return_type=pd.DataFrame):
