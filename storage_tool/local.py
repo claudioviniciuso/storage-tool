@@ -16,6 +16,7 @@ class LocalStorage(BaseStorage, DataProcessor):
         if not os.path.isdir(repository):
             raise ValueError('Repository does not exist')
         self.repository = repository
+        return "Success, {repository} defined".format(repository=repository)
             
     def create_repository(self, repository):
         """
@@ -24,7 +25,17 @@ class LocalStorage(BaseStorage, DataProcessor):
         if os.path.isdir(repository):
             raise ValueError('Repository already exists')
         os.mkdir(repository)
-
+        return "Success, {repository} created".format(repository=repository)
+    
+    def set_or_create_repository(self, repository):
+        """
+        Set or create repository
+        """
+        if not os.path.isdir(repository):
+            os.mkdir(repository)
+        self.repository = repository
+        return "Success, {repository} defined".format(repository=repository)
+        
     def list_repositories(self):
         """
         List repositories 
@@ -65,60 +76,84 @@ class LocalStorage(BaseStorage, DataProcessor):
         """
         Put file
         """
-        file_extension = file_path.split('.')[-1]
-        data_bytes = self.convert_to_bytes(content, file_extension)
+        try:
+            file_extension = file_path.split('.')[-1]
+            data_bytes = self.convert_to_bytes(content, file_extension)
 
-        if not os.path.isdir(os.path.join(self.repository, os.path.dirname(file_path))):
-            os.makedirs(os.path.join(self.repository, os.path.dirname(file_path)))
+            if not os.path.isdir(os.path.join(self.repository, os.path.dirname(file_path))):
+                os.makedirs(os.path.join(self.repository, os.path.dirname(file_path)))
 
-        with open(os.path.join(self.repository, file_path), 'wb') as f:
-            f.write(data_bytes)
-    
+            with open(os.path.join(self.repository, file_path), 'wb') as f:
+                f.write(data_bytes)
+            
+            return "Success, {file_path} created".format(file_path=file_path)
+        except Exception as e:
+            raise Exception("Error, {file_path} not created".format(file_path=file_path)) from e
+        
     def delete(self, file_path):
         """
         Delete file
         """
-        os.remove(os.path.join(self.repository, file_path))
+        try:
+            os.remove(os.path.join(self.repository, file_path))
+            return "Success, {file_path} deleted".format(file_path=file_path)
+        except Exception as e:
+            raise Exception("Error, {file_path} not deleted".format(file_path=file_path)) from e
 
     def move(self, src_path, dest_path):
         """
         Move file
         """
-        if not os.path.isdir(os.path.join(self.repository, os.path.dirname(dest_path))):
-            os.makedirs(os.path.join(self.repository, os.path.dirname(dest_path)))
+        try:
+            if not os.path.isdir(os.path.join(self.repository, os.path.dirname(dest_path))):
+                os.makedirs(os.path.join(self.repository, os.path.dirname(dest_path)))
 
-        os.rename(os.path.join(self.repository, src_path), os.path.join(self.repository, dest_path))
+            os.rename(os.path.join(self.repository, src_path), os.path.join(self.repository, dest_path))
+            return "Success, {src_path} moved to {dest_path}".format(src_path=src_path, dest_path=dest_path)
+        except Exception as e:
+            raise Exception("Error, {src_path} not moved to {dest_path}".format(src_path=src_path, dest_path=dest_path)) from e
 
     def move_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
         """
         Move file between repositories
         """
-            
-        os.makedirs(os.path.join(dest_repository, os.path.dirname(dest_path)), exist_ok=True)
+        try:
+            os.makedirs(os.path.join(dest_repository, os.path.dirname(dest_path)), exist_ok=True)
 
-        self.copy_between_repositories(src_repository, src_path, dest_repository, dest_path)
-        
-        self.delete(src_path)
+            self.copy_between_repositories(src_repository, src_path, dest_repository, dest_path)
+            
+            self.delete(src_path)
+            return "Success, {src_path} moved to {dest_path}".format(src_path=src_path, dest_path=dest_path)
+        except Exception as e:
+            raise Exception("Error, {src_path} not moved to {dest_path}".format(src_path=src_path, dest_path=dest_path)) from e
     
     def copy(self, src_path, dest_path):
         """
         Copy file
         """
-        os.makedirs(os.path.join(self.repository, os.path.dirname(dest_path)), exist_ok=True)
-        with open(os.path.join(self.repository, src_path), 'rb') as f:
-            data_bytes = f.read()
-        with open(os.path.join(self.repository, dest_path), 'wb') as f:
-            f.write(data_bytes)
+        try:
+            os.makedirs(os.path.join(self.repository, os.path.dirname(dest_path)), exist_ok=True)
+            with open(os.path.join(self.repository, src_path), 'rb') as f:
+                data_bytes = f.read()
+            with open(os.path.join(self.repository, dest_path), 'wb') as f:
+                f.write(data_bytes)
+            return "Success, {src_path} copied to {dest_path}".format(src_path=src_path, dest_path=dest_path)
+        except Exception as e:
+            raise Exception("Error, {src_path} not copied to {dest_path}".format(src_path=src_path, dest_path=dest_path)) from e
 
     def copy_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
         """
         Copy file between repositories
         """
-        os.makedirs(os.path.join(dest_repository, os.path.dirname(dest_path)), exist_ok=True)
-        with open(os.path.join(src_repository, src_path), 'rb') as f:
-            data_bytes = f.read()
-        with open(os.path.join(dest_repository, dest_path), 'wb') as f:
-            f.write(data_bytes)
+        try:
+            os.makedirs(os.path.join(dest_repository, os.path.dirname(dest_path)), exist_ok=True)
+            with open(os.path.join(src_repository, src_path), 'rb') as f:
+                data_bytes = f.read()
+            with open(os.path.join(dest_repository, dest_path), 'wb') as f:
+                f.write(data_bytes)
+            return "Success, {src_path} copied to {dest_path}".format(src_path=src_path, dest_path=dest_path)
+        except Exception as e:
+            raise Exception("Error, {src_path} not copied to {dest_path}".format(src_path=src_path, dest_path=dest_path)) from e
     
     def sync(self, src_path, dest_path):
         """
