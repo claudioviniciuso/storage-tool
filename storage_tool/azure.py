@@ -70,6 +70,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         self.client = Authorization.client
         self.container = None
 
+
     def set_container(self, container):
         """
         Verify and set container
@@ -83,6 +84,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         self.container = container
         return "Success, {container} defined".format(container=container)
 
+
     def create_container(self, container):
         """
         Create container
@@ -94,6 +96,7 @@ class AzureStorage(BaseStorage, DataProcessor):
             raise Exception('Error while creating container')
 
         return "Success, {container} created".format(container=container)
+
 
     def set_or_create_container(self, container):
         """
@@ -108,6 +111,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
         return "Success, {container} created and defined".format(container=container)
 
+
     def list_repositories(self):
         """
         List all containers in Azure
@@ -119,6 +123,7 @@ class AzureStorage(BaseStorage, DataProcessor):
             list_buckets.append({"repository": container['name'], "created_at": container['last_modified']})
 
         return list_buckets
+
 
     def list(self, path=''):
         """
@@ -150,29 +155,32 @@ class AzureStorage(BaseStorage, DataProcessor):
 
         return list_files
 
+
     def read(self, file_path, return_type=pd.DataFrame):
         """
-        Read file from S3
+        Read file from Azure
         :param file_path: File path
         :param return_type: Return type (dict, pd.DataFrame, list)
         return: File content
         """
-        if not self.repository:
+        if not self.container:
             raise Exception('Repository not set')
 
         try:
-            response = self.client.get_object(
-                Bucket=self.repository,
-                Key=file_path
+            blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=file_path
             )
+            bytes = blob_client.download_blob().readall()
+
             file_extension = file_path.split('.')[-1].lower()
-            data = self.process_data(response['Body'].read(), file_extension, return_type)
+
+            data = self.process_data(bytes, file_extension, return_type)
             return data
 
-        except ClientError as e:
-            raise Exception(f'Error while reading file: {e}')
         except Exception as e:
             raise Exception(f'Error while reading file: {e}')
+
 
     def put(self, file_path, content):
         """
@@ -198,26 +206,27 @@ class AzureStorage(BaseStorage, DataProcessor):
         except Exception as e:
             raise Exception(f'Error while writing file: {e}')
 
-    def delete(self,  file_path):
+
+    def delete(self, file_path):
         """
-        Delete file from S3
+        Delete file from Azure
         :param file_path: File path
 
         """
-        if not self.repository:
+        if not self.container:
             raise Exception('Repository not set')
         try:
-            response = self.client.delete_object(
-                Bucket=self.repository,
-                Key=file_path
+            blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=file_path
             )
-            if response.get('ResponseMetadata').get('HTTPStatusCode') != 204:
-                raise Exception('Error while deleting file')
+            blob_client.delete_blob()
+
             return "Success, file deleted"
-        except ClientError as e:
-            raise Exception(f'Error while deleting file: {e}')
+
         except Exception as e:
             raise Exception(f'Error while deleting file: {e}')
+
 
     def move(self, src_path, dest_path):
         """
