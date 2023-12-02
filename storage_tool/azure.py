@@ -285,18 +285,33 @@ class AzureStorage(BaseStorage, DataProcessor):
             raise Exception('File extension must be the same')
 
         try:
-            response = self.client.copy_object(
-                Bucket=dest_repository,
-                CopySource={'Bucket': src_repository, 'Key': src_path},
-                Key=dest_path
-            )
-            response = self.client.delete_object(
-                Bucket=src_repository,
-                Key=src_path
+            src_blob_client = self.client.get_blob_client(
+                container=src_repository,
+                blob=src_path
             )
 
+            src_blob_content = src_blob_client.download_blob().readall()
+
+            content_setting = ContentSettings(
+                content_type=src_blob_client.get_blob_properties().content_settings.content_type
+            )
+
+            dst_blob_client = self.client.get_blob_client(
+                container=dest_repository,
+                blob=dest_path
+            )
+
+            # Upload the content to the destination blob
+            dst_blob_client.upload_blob(
+                src_blob_content,
+                content_settings=content_setting
+            )
+
+            src_blob_client.delete_blob()
+
             return "Success, file moved"
-        except ClientError as e:
+
+        except Exception as e:
             raise Exception(f'Error while moving file: {e}')
 
 

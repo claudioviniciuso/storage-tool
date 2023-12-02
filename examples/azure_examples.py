@@ -45,9 +45,12 @@ print("Lista de arquivos:", storage.list())
 
 # PUT Object
 data_fake = [{'col1': 1, 'col2': 2},{'col1': 1, 'col2': 2}]
-storage.put(file_path='teste_A.csv', content=data_fake)
-# storage.put(file_path='teste_B.json', content=data_fake)
-# storage.put(file_path='teste_C.parquet', content=data_fake)
+try:
+    storage.put(file_path='teste_A.csv', content=data_fake)
+    storage.put(file_path='teste_B.json', content=data_fake)
+    storage.put(file_path='teste_C.parquet', content=data_fake)
+except:
+    pass
 
 # # Read to Dict
 # data = storage.read(file_path='teste_B.json', return_type=dict)
@@ -64,8 +67,8 @@ storage.put(file_path='teste_A.csv', content=data_fake)
 # # Move
 # storage.move(src_path='teste_A.csv', dest_path='folder_teste/teste_A.csv')
 
-# # Move Between Repositories
-# storage.move_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_A.csv', dest_repository='exemple-lib', dest_path='folder_teste/teste_A_move.csv')
+# Move Between Repositories
+storage.move_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_A.csv', dest_repository='testing', dest_path='folder_teste/teste_A_move.csv')
 
 # # Copy
 # storage.copy(src_path='folder_teste/teste_D.csv', dest_path='folder_teste/teste_D_copy.csv')
