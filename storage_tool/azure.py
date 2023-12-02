@@ -3,7 +3,7 @@ import pandas as pd
 
 from azure.core.exceptions import ResourceExistsError
 from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
 from storage_tool.base import BaseStorage
 from storage_tool.data_processor import DataProcessor
 
@@ -234,25 +234,43 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.repository:
+        if not self.container:
             raise Exception('Repository not set')
 
         if src_path.split('.')[-1].lower() != dest_path.split('.')[-1].lower():
             raise Exception('File extension must be the same')
+
         try:
-            response = self.client.copy_object(
-                Bucket=self.repository,
-                CopySource={'Bucket': self.repository, 'Key': src_path},
-                Key=dest_path
+            # Create a BlobServiceClient
+            src_blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=src_path
             )
 
-            response = self.client.delete_object(
-                Bucket=self.repository,
-                Key=src_path
+            # Get the content of the source blob
+            source_blob_content = src_blob_client.download_blob().readall()
+
+            # Create a reference to the destination blob
+            destination_blob = self.client.get_blob_client(
+                container=self.container,
+                blob=dest_path
             )
+
+            content_setting = ContentSettings(
+                content_type=src_blob_client.get_blob_properties().content_settings.content_type
+            )
+            # Upload the content to the destination blob
+            destination_blob.upload_blob(
+                source_blob_content,
+                content_settings=content_setting
+            )
+
+            # Delete the source blob
+            src_blob_client.delete_blob()
 
             return "Success, file moved"
-        except ClientError as e:
+
+        except Exception as e:
             raise Exception(f'Error while moving file: {e}')
 
     def move_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
@@ -284,26 +302,43 @@ class AzureStorage(BaseStorage, DataProcessor):
 
     def copy(self, src_path, dest_path):
         """
-        Copy file from one path to another path in the same repository
+        Copy file from one path to another path in the same container
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.repository:
-            raise Exception('Repository not set')
+        if not self.container:
+            raise Exception('Container not set')
 
         if src_path.split('.')[-1].lower() != dest_path.split('.')[-1].lower():
             raise Exception('File extension must be the same')
 
         try:
-            response = self.client.copy_object(
-                Bucket=self.repository,
-                CopySource={'Bucket': self.repository, 'Key': src_path},
-                Key=dest_path
+            # Create a BlobServiceClient
+            src_blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=src_path
+            )
+
+            # Get the content of the source blob
+            source_blob_content = src_blob_client.download_blob().readall()
+
+            # Create a reference to the destination blob
+            destination_blob = self.client.get_blob_client(
+                container=self.container,
+                blob=dest_path
+            )
+
+            content_setting = ContentSettings(
+                content_type=src_blob_client.get_blob_properties().content_settings.content_type
+            )
+            # Upload the content to the destination blob
+            destination_blob.upload_blob(
+                source_blob_content,
+                content_settings=content_setting
             )
 
             return "Success, file copied"
-        except ClientError as e:
-            raise Exception(f'Error while copying file: {e}')
+
         except Exception as e:
             raise Exception(f'Error while copying file: {e}')
 
