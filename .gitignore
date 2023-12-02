@@ -165,3 +165,5 @@ tmp/
 secrets/
 *.ipynb
 lab.py
+
+.DS_Store

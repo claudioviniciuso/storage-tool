@@ -37,6 +37,9 @@ urllib3 = "1.26.18"
 azure-storage-blob = "^12.19.0"
 azure-identity = "^1.15.0"
 
+[tool.poetry.group.dev.dependencies]
+python-dotenv = "^1.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

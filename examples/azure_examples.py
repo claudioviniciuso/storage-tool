@@ -1,15 +1,19 @@
 ## Importação da Lib
+from dotenv import load_dotenv
+import os
+
 import json
 import pandas as pd
 from storage_tool import Storage, Auth
 
 # Definir Storage Type
 STORAGE_TYPE = 'Azure'
-
+load_dotenv()
+azure_storage_connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 # Autenticação
 # Cria um objeto de autenticação e define as credenciais
 auth = Auth(STORAGE_TYPE).authenticator
-auth.set_credentials('AZURE_CONNECTION_STRING')
+auth.set_credentials(azure_storage_connection_string)
 
 # auth.test_credentials()
 
