@@ -1,7 +1,7 @@
 import os, uuid
 import pandas as pd
 
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
 from storage_tool.base import BaseStorage
@@ -273,6 +273,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         except Exception as e:
             raise Exception(f'Error while moving file: {e}')
 
+
     def move_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
         """
         Move file from one repository to another repository
@@ -357,6 +358,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         except Exception as e:
             raise Exception(f'Error while copying file: {e}')
 
+
     def copy_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
         """
         Copy file from one repository to another repository
@@ -369,17 +371,33 @@ class AzureStorage(BaseStorage, DataProcessor):
             raise Exception('File extension must be the same')
 
         try:
-            response = self.client.copy_object(
-                Bucket=dest_repository,
-                CopySource={'Bucket': src_repository, 'Key': src_path},
-                Key=dest_path
+            src_blob_client = self.client.get_blob_client(
+                container=src_repository,
+                blob=src_path
+            )
+
+            src_blob_content = src_blob_client.download_blob().readall()
+
+            content_setting = ContentSettings(
+                content_type=src_blob_client.get_blob_properties().content_settings.content_type
+            )
+
+            dst_blob_client = self.client.get_blob_client(
+                container=dest_repository,
+                blob=dest_path
+            )
+
+            # Upload the content to the destination blob
+            dst_blob_client.upload_blob(
+                src_blob_content,
+                content_settings=content_setting
             )
 
             return "Success, file copied"
-        except ClientError as e:
-            raise Exception(f'Error while copying file: {e}')
+
         except Exception as e:
             raise Exception(f'Error while copying file: {e}')
+
 
     def sync(self, src_path, dest_path):
         """
@@ -409,6 +427,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         except Exception as e:
             raise Exception(f'Error while syncing files: {e}')
 
+
     def sync_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
         """
         Sync files from one repository to another repository
@@ -436,26 +455,30 @@ class AzureStorage(BaseStorage, DataProcessor):
         except Exception as e:
             raise Exception(f'Error while syncing files: {e}')
 
-    def exists(self,  file_path):
+
+    def exists(self, file_path):
         """
         Check if file exists
         :param file_path: File path
         """
-        if not self.repository:
-            raise Exception('Repository not set')
+        if not self.container:
+            raise Exception('Container not set')
+
         try:
-            response = self.client.head_object(
-                Bucket=self.repository,
-                Key=file_path
+            blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=file_path
             )
+
+            blob_properties = blob_client.get_blob_properties()
+
             return True
-        except ClientError as e:
-            if e.response['Error']['Code'] == '404':
-                return False
-            else:
-                raise Exception(f'Error while checking file existence: {e}')
+
+        except ResourceNotFoundError:
+            return False
         except Exception as e:
             raise Exception(f'Error while checking file existence: {e}')
+
 
     def get_metadata(self, file_path):
         """
