@@ -401,29 +401,42 @@ class AzureStorage(BaseStorage, DataProcessor):
 
     def sync(self, src_path, dest_path):
         """
-        Sync files from one repository to another repository
+        Sync files from one container to another container
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.repository:
-            raise Exception('Repository not set')
-        try:
-            response = self.client.list_objects_v2(
-                Bucket=self.repository,
-                Prefix=src_path
-            )
-            if response.get('ResponseMetadata').get('HTTPStatusCode') != 200:
-                raise Exception('Error while listing files')
+        if not self.container:
+            raise Exception('Container not set')
 
-            for file in response['Contents']:
-                file_path = file['Key']
-                file_name = file_path.split('/')[-1]
-                dest_file_path = f'{dest_path}/{file_name}'
-                self.copy(self.repository, file_path, dest_file_path)
+        try:
+            container_client = self.client.get_container_client(self.container)
+
+            # Ensure source path ends with '/'
+            src_path = src_path.rstrip('/') + '/'
+
+            # Ensure destination path ends with '/'
+            dest_path = dest_path.rstrip('/') + '/'
+
+            # List blobs in the source path
+            blobs = container_client.walk_blobs(name_starts_with=src_path)
+
+            # Iterate over blobs and copy to the destination path
+            for blob in blobs:
+                source_blob_name = blob['name']
+                dest_blob_name = os.path.join(
+                    dest_path,
+                    os.path.relpath(source_blob_name, src_path)
+                ).replace(os.path.sep, "/")
+
+                # Get blob clients
+                source_blob_client = container_client.get_blob_client(source_blob_name)
+                destination_blob_client = container_client.get_blob_client(dest_blob_name)
+
+                # Copy blob from source to destination
+                destination_blob_client.start_copy_from_url(source_blob_client.url)
 
             return "Success, files synced"
-        except ClientError as e:
-            raise Exception(f'Error while syncing files: {e}')
+
         except Exception as e:
             raise Exception(f'Error while syncing files: {e}')
 
@@ -496,7 +509,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
             blob_properties = blob_client.get_blob_properties()
 
-            return "Success, file metadata"
+            return blob_properties
 
         except ResourceNotFoundError as e:
             return Exception(f'Error while checking file existence: {e}')

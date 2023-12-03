@@ -40,15 +40,15 @@ except Exception:
 
 storage.set_container(container='lab-xpto')
 
-# # Listar Objetos
-# print("Lista de arquivos:", storage.list())
+# Listar Objetos
+print("Lista de arquivos:", storage.list())
 
 # # PUT Object
-# data_fake = [{'col1': 1, 'col2': 2},{'col1': 1, 'col2': 2}]
+data_fake = [{'col1': 1, 'col2': 2},{'col1': 1, 'col2': 2}]
 # try:
-#     storage.put(file_path='teste_A.csv', content=data_fake)
-#     storage.put(file_path='teste_B.json', content=data_fake)
-#     storage.put(file_path='teste_C.parquet', content=data_fake)
+#     storage.put(file_path='folder_a/teste_A.csv', content=data_fake)
+#     storage.put(file_path='folder_a/teste_B.json', content=data_fake)
+#     storage.put(file_path='folder_a/teste_C.parquet', content=data_fake)
 # except:
 #     pass
 
@@ -98,7 +98,18 @@ print("Arquivo existe (folder_teste/teste_D.csv)? ",
     storage.exists(file_path='folder_teste/non_existing_file.csv'))
 
 # # Get Metadata
-print("Metadados do arquivo: ", storage.get_metadata(file_path='teste_A.csv'))
+# print("Metadados do arquivo: ", storage.get_metadata(file_path='teste_A.csv'))
 
 # # Get File URL
 print("URL do arquivo: ", storage.get_file_url(file_path='teste_A.csv'))
+
+# Testing sync between paths from same container
+try:
+    storage.put(file_path='folder_a/file001.csv', content=data_fake)
+    storage.put(file_path='folder_a/file002.json', content=data_fake)
+    storage.put(file_path='folder_a/file003.parquet', content=data_fake)
+except:
+    print('arquivos já criados!')
+    pass
+
+storage.sync('folder_a', 'folder_b')
