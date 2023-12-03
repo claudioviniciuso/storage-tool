@@ -113,3 +113,8 @@ except:
     pass
 
 storage.sync('folder_a', 'folder_b')
+
+storage.sync_between_repositories(
+    'lab-xpto', 'folder_a',
+    'testing', 'folder_b'
+)
