@@ -485,21 +485,24 @@ class AzureStorage(BaseStorage, DataProcessor):
         Get file metadata
         :param file_path: File path
         """
-        if not self.repository:
-            raise Exception('Repository not set')
+        if not self.container:
+            raise Exception('Container not set')
 
         try:
-            response = self.client.head_object(
-                Bucket=self.repository,
-                Key=file_path
+            blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=file_path
             )
-            if response.get('ResponseMetadata').get('HTTPStatusCode') != 200:
-                raise Exception('Error while getting file metadata')
+
+            blob_properties = blob_client.get_blob_properties()
+
             return "Success, file metadata"
-        except ClientError as e:
-            raise Exception(f'Error while getting file metadata: {e}')
+
+        except ResourceNotFoundError as e:
+            return Exception(f'Error while checking file existence: {e}')
         except Exception as e:
             raise Exception(f'Error while getting file metadata: {e}')
+
 
     def get_file_url(self, file_path):
         """
@@ -507,22 +510,20 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param file_path: File path
 
         """
-        if not self.repository:
+        if not self.container:
             raise Exception('Repository not set')
         try:
-            response = self.client.generate_presigned_url(
-                ClientMethod='get_object',
-                Params={
-                    'Bucket': self.repository,
-                    'Key': file_path,
-                },
-                ExpiresIn=120
+            blob_client = self.client.get_blob_client(
+                container=self.container,
+                blob=file_path
             )
-            if response.get('ResponseMetadata').get('HTTPStatusCode') != 200:
-                raise Exception('Error while getting file url')
 
-            return response
-        except ClientError as e:
-            raise Exception(f'Error while getting file url: {e}')
+            blob_url = blob_client.url
+
+            return blob_url
+
+        except ResourceNotFoundError as e:
+            return Exception(f'Error while checking file existence: {e}')
+
         except Exception as e:
             raise Exception(f'Error while getting file url: {e}')

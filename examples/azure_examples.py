@@ -21,7 +21,7 @@ auth.set_credentials(azure_storage_connection_string)
 storage = Storage(STORAGE_TYPE, auth).get_model()
 
 # Listar Containers
-print("Lista de containers: ", storage.list_repositories())
+# print("Lista de containers: ", storage.list_repositories())
 
 # Criar Repositório
 try:
@@ -40,47 +40,65 @@ except Exception:
 
 storage.set_container(container='lab-xpto')
 
-# Listar Objetos
-print("Lista de arquivos:", storage.list())
+# # Listar Objetos
+# print("Lista de arquivos:", storage.list())
 
-# PUT Object
-data_fake = [{'col1': 1, 'col2': 2},{'col1': 1, 'col2': 2}]
-try:
-    storage.put(file_path='teste_A.csv', content=data_fake)
-    storage.put(file_path='teste_B.json', content=data_fake)
-    storage.put(file_path='teste_C.parquet', content=data_fake)
-except:
-    pass
+# # PUT Object
+# data_fake = [{'col1': 1, 'col2': 2},{'col1': 1, 'col2': 2}]
+# try:
+#     storage.put(file_path='teste_A.csv', content=data_fake)
+#     storage.put(file_path='teste_B.json', content=data_fake)
+#     storage.put(file_path='teste_C.parquet', content=data_fake)
+# except:
+#     pass
 
-# # Read to Dict
-# data = storage.read(file_path='teste_B.json', return_type=dict)
-# print("Dados do arquivo teste_B.json: ", data)
+# # # Read to Dict
+# # data = storage.read(file_path='teste_B.json', return_type=dict)
+# # print("Dados do arquivo teste_B.json: ", data)
 
-# # Read to DataFrame
-# data = storage.read(file_path='teste_B.json', return_type=pd.DataFrame)
-# print("Dados do arquivo teste_B.json: ")
-# print(data)
+# # # Read to DataFrame
+# # data = storage.read(file_path='teste_B.json', return_type=pd.DataFrame)
+# # print("Dados do arquivo teste_B.json: ")
+# # print(data)
 
-# # Delete
-# storage.delete(file_path='teste_B.json')
+# # # Delete
+# # storage.delete(file_path='teste_B.json')
 
-# # Move
-# storage.move(src_path='teste_A.csv', dest_path='folder_teste/teste_A.csv')
+# # # Move
+# try:
+#     storage.move(src_path='teste_A.csv', dest_path='folder_teste/teste_A.csv')
+# except:
+#     print('already moved the file')
+#     pass
+# # Move Between Repositories
+# try:
+#     storage.move_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_A.csv', dest_repository='testing', dest_path='folder_teste/teste_A_move.csv')
+# except:
+#     print('already moved the file')
+#     pass
 
-# Move Between Repositories
-storage.move_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_A.csv', dest_repository='testing', dest_path='folder_teste/teste_A_move.csv')
+# # # Copy
+# try:
+#     storage.copy(src_path='folder_teste/teste_D.csv', dest_path='folder_teste/teste_D_copy.csv')
+# except:
+#     print('already moved the file')
+#     pass
 
-# # Copy
-# storage.copy(src_path='folder_teste/teste_D.csv', dest_path='folder_teste/teste_D_copy.csv')
-
-# # Copy Between Repositories
-# storage.copy_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_D.csv', dest_repository='exemple-lib', dest_path='folder_teste_x/teste_D_copy.csv')
-
+# # # Copy Between Repositories
+# try:
+#     storage.copy_between_repositories(src_repository='lab-xpto', src_path='folder_teste/teste_D.csv', dest_repository='exemple-lib', dest_path='folder_teste_x/teste_D_copy.csv')
+# except:
+#     print('already moved the file')
+#     pass
 # # Exists
-# print("Arquivo existe? ", storage.exists(file_path='folder_teste/teste_D.csv'))
+print("Arquivo existe (teste_A.csv)? ",
+    storage.exists(file_path='teste_A.csv'))
+
+print("Arquivo existe (folder_teste/teste_D.csv)? ",
+    storage.exists(file_path='folder_teste/non_existing_file.csv'))
 
 # # Get Metadata
-# print("Metadados do arquivo: ", storage.get_metadata(file_path='folder_teste/teste_D.csv'))
+print("Metadados do arquivo: ", storage.get_metadata(file_path='teste_A.csv'))
 
 # # Get File URL
-# print("URL do arquivo: ", storage.get_file_url(file_path='folder_teste/teste_D.csv'))
+print("URL do arquivo: ", storage.get_file_url(file_path='teste_A.csv'))
