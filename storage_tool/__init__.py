@@ -1,4 +1,5 @@
-from storage_tool.s3 import S3Storage, S3Authorization
+from storage_tool.azure import AzureAuthorization, AzureStorage
+from storage_tool.S3 import S3Storage, S3Authorization
 from storage_tool.local import LocalStorage
 
 class Auth:
@@ -16,7 +17,7 @@ class Auth:
         elif self.storage_type == 'GCP':
             raise NotImplementedError
         elif self.storage_type == 'Azure':
-            raise NotImplementedError
+            self.authenticator = AzureAuthorization()
         else:
             raise NotImplementedError
 
@@ -29,14 +30,14 @@ class Storage:
     def get_model(self):
         if self.storage_type == 'S3':
             self.storage = S3Storage(self.authorization)
-            
+
         elif self.storage_type == 'LOCAL':
             self.storage = LocalStorage()
-            
+
         elif self.storage_type == 'GCP':
             raise NotImplementedError
         elif self.storage_type == 'Azure':
-            raise NotImplementedError
+            self.storage = AzureStorage(self.authorization)
         else:
             raise NotImplementedError
         return self.storage
