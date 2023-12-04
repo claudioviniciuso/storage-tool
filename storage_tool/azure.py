@@ -204,7 +204,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
             return "Success, file written"
         except Exception as e:
-            raise Exception(f'Error while writing file: {e}')
+            raise Exception(f'Error while writing file: {file_path}')
 
 
     def delete(self, file_path):
