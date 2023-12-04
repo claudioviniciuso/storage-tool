@@ -15,6 +15,7 @@ class AzureAuthorization:
         """
         self.connection_string = None
 
+
     def set_credentials(self, connection_string):
         """
         Set credentials to connect and access to Azure
@@ -28,21 +29,20 @@ class AzureAuthorization:
 
         return "Success, credentials defined"
 
+
     def test_credentials(self):
         """
         Test credentials to connect to S3
         """
         try:
             client = self.client
-            containers = client.list_containers()
-
-            for container in containers:
-                print(container['name'])
+            client.list_containers()
 
         except Exception as e:
-            # print(e)
             return False
+
         return True
+
 
     @property
     def client(self):
