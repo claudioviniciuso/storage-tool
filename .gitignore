@@ -167,3 +167,10 @@ secrets/
 lab.py
 
 .DS_Store
+
+# Azurite
+__blobstorage__/
+__queuestorage__/
+__azurite_db_*__.json
+
+.idea/

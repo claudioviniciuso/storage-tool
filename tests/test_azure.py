@@ -48,6 +48,24 @@ def test_azure_connection(azure_credentials):
         pytest.fail(f"Azure Storage connection test failed: {e}")
 
 
+def test_creating_containers(azure_credentials, get_storage):
+
+    try:
+
+        storage = get_storage['storage']
+        delete_all_containers(client= storage.client)
+
+        storage.create_container(container=azure_credentials['default_container'])
+        storage.create_container(container=azure_credentials['second_container'])
+
+        containers = storage.list_repositories()
+
+        assert len(containers) == 2
+
+    except Exception as e:
+        pytest.fail(f"Azure Storage connection test failed: {e}")
+
+
 def test_listing_containers(azure_credentials, get_storage):
 
     try:
@@ -102,6 +120,68 @@ def test_put_raises_exception(azure_credentials, get_storage):
 
         storage.put(file_path=filename, content=data_fake)
         storage.put(file_path=filename, content=data_fake)
+
+
+def test_listing_files(azure_credentials, get_storage):
+
+    try:
+        storage = get_storage['storage']
+
+        storage.set_container(container= azure_credentials['default_container'])
+
+        # print(storage.list())
+        delete_all_files_in_container(
+            container_client= storage.client.get_container_client(container= azure_credentials['default_container'])
+        )
+        # print(storage.list())
+
+        data_fake = [{'col1': 1, 'col2': 2}]
+        countfile = 1
+        files = []
+
+        for idx in range(2):
+            filename = f'file{countfile}.csv'
+            files.append(filename)
+            try:
+                storage.put(file_path=f'{filename}', content=data_fake)
+            except:
+                pass
+            countfile += 1
+
+        path = 'folderA/'
+
+        for idx in range(2):
+            filename = f'{path}file{countfile}.csv'
+            files.append(filename)
+            try:
+                storage.put(file_path=filename, content=data_fake)
+            except:
+                pass
+            countfile += 1
+
+        subpath = 'folderA/subfolderA/'
+
+        for idx in range(2):
+            filename = f'{subpath}file{countfile}.csv'
+            files.append(filename)
+            try:
+                storage.put(file_path=filename, content=data_fake)
+            except:
+                pass
+            countfile += 1
+
+        listing_folderA = storage.list(path='folderA/')
+
+        assert len(listing_folderA) == 3
+        found_subfolder = any(item['object'] == 'subfolderA/' for item in listing_folderA)
+        assert found_subfolder, "'subfolderA/' not found in data"
+
+        listing_subfolderA = storage.list(path='subfolderA/')
+
+        assert len(listing_subfolderA) == 2
+
+    except Exception as e:
+        pytest.fail(f"Azure Storage connection test failed: {e}")
 
 
 def test_read_file(azure_credentials, get_storage):
@@ -332,3 +412,23 @@ def test_syncying_between_containers(azure_credentials, get_storage):
 
     except Exception as e:
         pytest.fail(f"Azure Storage connection test failed: {e}")
+
+
+def delete_all_files_in_container(container_client):
+    # List blobs in the container
+    blob_list = container_client.list_blobs()
+
+    # Delete each blob in the container
+    for blob in blob_list:
+        blob_client = container_client.get_blob_client(blob.name)
+        blob_client.delete_blob()
+
+
+def delete_all_containers(client):
+    # List all containers in the storage account
+    containers = client.list_containers()
+
+    # Delete each container
+    for container in containers:
+        container_client = client.get_container_client(container['name'])
+        container_client.delete_container()
