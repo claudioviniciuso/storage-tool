@@ -4,7 +4,7 @@ from storage_tool.local import LocalStorage
 
 class Auth:
     def __init__(self, storage_type) -> None:
-        self.storage_type = storage_type
+        self.storage_type = storage_type.upper()
         self.authenticator = None
         self.set_auth()
         pass
@@ -16,14 +16,14 @@ class Auth:
             self.authenticator = None
         elif self.storage_type == 'GCP':
             raise NotImplementedError
-        elif self.storage_type == 'Azure':
+        elif self.storage_type == 'AZURE':
             self.authenticator = AzureAuthorization()
         else:
             raise NotImplementedError
 
 class Storage:
     def __init__(self, storage_type, authorization) -> None:
-        self.storage_type = storage_type
+        self.storage_type = storage_type.upper()
         self.authorization = authorization
         self.storage = None
 
@@ -36,7 +36,7 @@ class Storage:
 
         elif self.storage_type == 'GCP':
             raise NotImplementedError
-        elif self.storage_type == 'Azure':
+        elif self.storage_type == 'AZURE':
             self.storage = AzureStorage(self.authorization)
         else:
             raise NotImplementedError
