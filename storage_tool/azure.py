@@ -8,6 +8,11 @@ from storage_tool.base import BaseStorage
 from storage_tool.data_processor import DataProcessor
 
 
+def erase_after_pattern(original_string, pattern):
+    parts = original_string.split(pattern, 1)
+    result = parts[1] if len(parts) > 0 else original_string
+    return result
+
 class AzureAuthorization:
     def __init__(self):
         """
@@ -138,19 +143,32 @@ class AzureStorage(BaseStorage, DataProcessor):
 
         blob_list = container_client.list_blobs()
 
+        # Filter blobs that match the desired subfolder
+        subfolder_blobs = [blob for blob in blob_list if path in blob.name]
+
+        # for blob in subfolder_blobs:
+        #     print(f"Name: {blob.name}")
+
         list_files = []
 
         if not blob_list:
             return list_files
 
-        for file in blob_list:
-            # Verify if object is a folder or file
-            if len(file['name'].split('/')) > 1:
-                list_files.append({"object": f"{file['name'].split('/')[0]}/", "type": "folder"})
+        for file in subfolder_blobs:
+            if path:
+                filename = erase_after_pattern(
+                    original_string=file['name'],
+                    pattern= path
+                )
             else:
-                list_files.append({"object": file['name'], "type": "file"})
+                filename = file['name']
+            # Verify if object is a folder or file
+            if len(filename.split('/')) > 1:
+                list_files.append({"object": f"{filename.split('/')[0]}/", "type": "folder"})
+            else:
+                list_files.append({"object": filename, "type": "file"})
 
-        # Return unique items
+        # # Return unique items
         list_files = [dict(t) for t in {tuple(d.items()) for d in list_files}]
 
         return list_files
