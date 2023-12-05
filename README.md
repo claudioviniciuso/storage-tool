@@ -44,7 +44,16 @@ A **`storage-tool`** é uma biblioteca Python projetada para abstrair e orquestr
 
 Esta definição serve como uma introdução ao propósito e capacidades da **`storage-tool`**, estabelecendo uma base para detalhar as funcionalidades e a lógica de funcionamento nos próximos pontos
 
-  
+## **Integrações**
+
+A biblioteca planeja integrar com os seguintes ambientes:
+
+* :white_check_mark: **`Local Sotrage`** 
+* :white_check_mark: **`S3 Sotrage`** 
+* :white_check_mark: **`Azure Blob Sotrage `** 
+* :construction_worker: **`Google Cloud Sotrage`** 
+
+
 
 # Exemplo das Operações
 
@@ -446,3 +455,11 @@ storage-tool/
 *   [**`README.md`**](http://README.md): Uma introdução ao projeto, instruções de instalação e uso básico, e qualquer outra informação relevante para os usuários da biblioteca.
 *   [**`setup.py`**](http://setup.py): Este script é usado pelo **`setuptools`** para instalar a biblioteca.
 *   **`requirements.txt`**: Lista todas as dependências externas necessárias para executar a biblioteca.
+
+
+
+## **Colaboradores:**
+
+<a href="https://github.com/claudioviniciuso/storage_tool/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=claudioviniciuso/storage-tool&max=100" alt="Lista de contribuidores" width="150px"/>
+</a>
