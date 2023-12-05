@@ -1,5 +1,5 @@
 from storage_tool.azure import AzureAuthorization, AzureStorage
-from storage_tool.S3 import S3Storage, S3Authorization
+from storage_tool.s3 import S3Storage, S3Authorization
 from storage_tool.local import LocalStorage
 
 class Auth:
