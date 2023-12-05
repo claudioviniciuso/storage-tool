@@ -73,48 +73,48 @@ class AzureStorage(BaseStorage, DataProcessor):
             raise Exception('Invalid credentials')
 
         self.client = Authorization.client
-        self.container = None
+        self.repository = None
 
 
-    def set_container(self, container):
+    def set_repository(self, repository):
         """
         Verify and set container
         :param container: Container name
         """
         containers = self.list_repositories()
-        exists = any(d["repository"] == container for d in containers)
+        exists = any(d["repository"] == repository for d in containers)
         if not exists:
             raise Exception('Repository not found')
 
-        self.container = container
-        return "Success, {container} defined".format(container=container)
+        self.repository = repository
+        return "Success, {container} defined".format(container=repository)
 
 
-    def create_container(self, container):
+    def create_repository(self, repository):
         """
         Create container
         :param container: container name
         """
         try:
-            self.client.create_container(name=container)
+            self.client.create_container(name=repository)
         except ResourceExistsError:
             raise Exception('Error while creating container')
 
-        return "Success, {container} created".format(container=container)
+        return "Success, {container} created".format(container=repository)
 
 
-    def set_or_create_container(self, container):
+    def set_or_create_repository(self, repository):
         """
         Verify and set container
         :param container: container name
         """
         repositories = self.list_repositories()
-        exists = any(d["container"] == container for d in repositories)
+        exists = any(d["container"] == repository for d in repositories)
         if not exists:
-            self.create_container(container)
-        self.container = container
+            self.create_container(repository)
+        self.repository = repository
 
-        return "Success, {container} created and defined".format(container=container)
+        return "Success, {container} created and defined".format(container=repository)
 
 
     def list_repositories(self):
@@ -136,10 +136,10 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param path: Path to list
         return: List of files and folders
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
 
-        container_client = self.client.get_container_client(container= self.container)
+        container_client = self.client.get_container_client(container= self.repository)
 
         blob_list = container_client.list_blobs()
 
@@ -181,12 +181,12 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param return_type: Return type (dict, pd.DataFrame, list)
         return: File content
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
 
         try:
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
             bytes = blob_client.download_blob().readall()
@@ -207,12 +207,12 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param content: File content
 
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
         try:
 
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
 
@@ -231,11 +231,11 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param file_path: File path
 
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
         try:
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
             blob_client.delete_blob()
@@ -252,7 +252,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
 
         if src_path.split('.')[-1].lower() != dest_path.split('.')[-1].lower():
@@ -261,7 +261,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         try:
             # Create a BlobServiceClient
             src_blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=src_path
             )
 
@@ -270,7 +270,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
             # Create a reference to the destination blob
             destination_blob = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=dest_path
             )
 
@@ -340,7 +340,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Container not set')
 
         if src_path.split('.')[-1].lower() != dest_path.split('.')[-1].lower():
@@ -349,7 +349,7 @@ class AzureStorage(BaseStorage, DataProcessor):
         try:
             # Create a BlobServiceClient
             src_blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=src_path
             )
 
@@ -358,7 +358,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
             # Create a reference to the destination blob
             destination_blob = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=dest_path
             )
 
@@ -423,11 +423,11 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param src_path: Source path
         :param dest_path: Destination path
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Container not set')
 
         try:
-            container_client = self.client.get_container_client(self.container)
+            container_client = self.client.get_container_client(self.repository)
 
             # Ensure source path ends with '/'
             src_path = src_path.rstrip('/') + '/'
@@ -504,12 +504,12 @@ class AzureStorage(BaseStorage, DataProcessor):
         Check if file exists
         :param file_path: File path
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Container not set')
 
         try:
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
 
@@ -528,12 +528,12 @@ class AzureStorage(BaseStorage, DataProcessor):
         Get file metadata
         :param file_path: File path
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Container not set')
 
         try:
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
 
@@ -553,11 +553,11 @@ class AzureStorage(BaseStorage, DataProcessor):
         :param file_path: File path
 
         """
-        if not self.container:
+        if not self.repository:
             raise Exception('Repository not set')
         try:
             blob_client = self.client.get_blob_client(
-                container=self.container,
+                container=self.repository,
                 blob=file_path
             )
 

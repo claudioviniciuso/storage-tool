@@ -46,7 +46,7 @@ Exemplo de uso:
 from storage_tool import Storage, Auth
 
 # Definir Storage Type
-STORAGE_TYPE = 'Azure'
+STORAGE_TYPE = 'AZURE'
 
 # Autenticação
 # Cria um objeto de autenticação e define as credenciais

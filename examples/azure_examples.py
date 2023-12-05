@@ -27,7 +27,7 @@ storage = Storage(STORAGE_TYPE, auth).get_model()
 
 # Criar Repositório
 try:
-    storage.create_container("localtest")
+    storage.create_repository("localtest")
 except Exception:
     print('already created!')
     pass
@@ -35,7 +35,7 @@ except Exception:
 
 # # Selecionar Repositório
 try:
-    storage.set_container(container='localtest')
+    storage.set_repository(container='localtest')
 except Exception:
     print('correct! this not exist!')
     pass

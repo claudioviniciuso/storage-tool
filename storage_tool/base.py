@@ -1,8 +1,17 @@
 from abc import ABC, abstractmethod
 
 class BaseStorage(ABC):
-    def __init__(self, config):
-        self.config = config
+    @abstractmethod
+    def create_repository(self, repository):
+        pass
+
+    @abstractmethod
+    def set_repository(self, repository):
+        pass
+
+    @abstractmethod
+    def set_or_create_repository(self, repository):
+        pass
 
     @abstractmethod
     def list_repositories(self):
