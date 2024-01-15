@@ -59,7 +59,7 @@ class LocalStorage(BaseStorage, DataProcessor):
             if os.path.isfile(os.path.join(self.repository, path, item)):
                 list_.append({"object": item, "type": "file"})
             elif os.path.isdir(os.path.join(self.repository, path, item)):
-                list_.append({"object": "f{item}/", "type": "folder"})
+                list_.append({"object": f"{item}/", "type": "folder"})
         
         return list_
     
