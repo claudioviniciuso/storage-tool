@@ -48,10 +48,10 @@ Esta definição serve como uma introdução ao propósito e capacidades da **`s
 
 A biblioteca planeja integrar com os seguintes ambientes:
 
-* :white_check_mark: **`Local Sotrage`** 
-* :white_check_mark: **`S3 Sotrage`** 
-* :white_check_mark: **`Azure Blob Sotrage `** 
-* :construction_worker: **`Google Cloud Sotrage`** 
+* :white_check_mark: **`Local Storage`** 
+* :white_check_mark: **`S3 Storage`** 
+* :white_check_mark: **`Azure Blob Storage `** 
+* :construction_worker: **`Google Cloud Storage`** 
 
 
 
@@ -189,7 +189,7 @@ Estas são descrições e exemplos de alto nível que ilustram o propósito de c
 | ---| --- |
 | AWS | boto3 |
 | Azure Blob | azure.storage.blob (BlobServiceClient) |
-| GCP | [google.cloud.storage](http://google.cloud.storage) |
+| GCS | [google.cloud.storage](http://google.cloud.storage) |
 | Local | os |
 
   
@@ -230,9 +230,24 @@ storage = Storage("S3", auth).get_model()
 
 Em desenvolvimento
 
-### **Google Cloud Storage (GCP)**
+### **Google Cloud Storage (GCS)**
 
-Em desenvolvimento
+**Autenticação:**
+
+Para autenticar com GCP será necessário ter: `client_id`, `client_email`, `private_key` e `private_key_id`.
+
+**Exemplo:**
+
+```python
+from storage_tool import Auth, Storage
+
+auth = Auth("GCS").authenticator
+auth.set_credentials(client_id, client_email, private_key, private_key_id)
+
+storage = Storage("GCS", auth).get_model()
+
+
+```
 
   
 
@@ -277,7 +292,7 @@ Para obter credenciais para o Azure Blob Storage:
 3. No painel da conta de armazenamento, encontre a seção "Access keys" ou "Shared access signature".
 4. Copie a "Connection string" ou crie uma SAS (Shared Access Signature) conforme necessário.
 
-### **Google Cloud Storage (GCP) com** **`google-cloud-storage`**
+### **Google Cloud Storage (GCS) com** **`google-cloud-storage`**
 
 Para obter credenciais para o Google Cloud Storage:
 
@@ -286,7 +301,7 @@ Para obter credenciais para o Google Cloud Storage:
 3. Navegue até "IAM & Admin" > "Service accounts".
 4. Crie uma nova conta de serviço ou selecione uma existente.
 5. Clique em "Create Key" e escolha o formato JSON. Salve o arquivo de chave JSON em um local seguro.
-6. Defina a variável de ambiente **`GOOGLE_APPLICATION_CREDENTIALS`** para o caminho do arquivo JSON de chave de serviço.
+6. Defina a variável de ambiente **`GOOGLE_APPLICATION_CREDENTIALS_PATH`** para o caminho do arquivo JSON de chave de serviço OU defina a variável de ambiente **`GOOGLE_APPLICATION_CREDENTIALS`** com o conteúdo do arquivo JSON de chave de serviço.
 
 ### **Ambiente Local**
 
@@ -312,8 +327,9 @@ Para o ambiente local, não são necessárias credenciais de serviços em nuvem.
         elif self.storage_type == 'LOCAL':
             self.storage = LocalStorage()
             
-        elif self.storage_type == 'GCP':
-            raise NotImplementedError
+        elif self.storage_type == 'GCS':
+            self.storage = GCSStorage()
+
         elif self.storage_type == 'Azure':
             raise NotImplementedError
         else:
@@ -411,7 +427,7 @@ storage-tool/
 │   ├── base.py               # Classe base de armazenamento
 │   ├── s3.py                 # Módulo para AWS S3
 │   ├── azure.py              # Módulo para Azure Blob Storage
-│   ├── gcp.py                # Módulo para Google Cloud Storage
+│   ├── gcs.py                # Módulo para Google Cloud Storage
 │   ├── local.py              # Módulo para armazenamento local
 │   └── utils.py              # Utilitários e funções auxiliares
 │
@@ -420,14 +436,13 @@ storage-tool/
 │   ├── test_base.py
 │   ├── test_aws.py
 │   ├── test_azure.py
-│   ├── test_gcp.py
 │   └── test_local.py
 │
 ├── examples/                 # Exemplos de como usar a biblioteca
 │   ├── __init__.py
 │   ├── aws_example.py
 │   ├── azure_example.py
-│   ├── gcp_example.py
+│   ├── gcs_example.py
 │   └── local_example.py
 │
 ├── docs/                     # Documentação do projeto
