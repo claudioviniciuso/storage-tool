@@ -36,7 +36,7 @@ class Storage:
             self.storage = LocalStorage()
 
         elif self.storage_type == 'GCS':
-            self.storage = GCSStorage()
+            self.storage = GCSStorage(self.authorization)
 
         elif self.storage_type == 'AZURE':
             self.storage = AzureStorage(self.authorization)

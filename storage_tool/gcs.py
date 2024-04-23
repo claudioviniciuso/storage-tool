@@ -15,8 +15,8 @@ class GCSAuthorization:
             'type': 'service_account',
             'client_id': client_id,
             'client_email': client_email,
-            'private_key_id': private_key,
-            'private_key': private_key_id,
+            'private_key_id': private_key_id,
+            'private_key': private_key,
         }
         self.credentials = ServiceAccountCredentials.from_json_keyfile_dict(
             credentials_dict
@@ -29,7 +29,7 @@ class GCSAuthorization:
         Test credentials to connect
         """
         try:
-            client = storage.Client(credentials=self.auth.credentials, project=self.auth.project_id)
+            client = storage.Client(credentials=self.credentials, project=self.project_id)
             client.list_buckets()
         except Exception as e:
             print(e)
@@ -263,3 +263,15 @@ class GCSStorage(BaseStorage, DataProcessor):
             return bucket.get_blob(file_path)
         except Exception as e:
             raise Exception(f'Error while getting file metadata: {e}')
+    
+    def sync(self, repository, src_path, dest_path):
+        pass
+
+    def get_file_url(self):
+        pass
+
+    def sync_between_repositories(self, src_repository, src_path, dest_repository, dest_path):
+        pass
+
+    def exists(self, repository, file_path):
+        pass
