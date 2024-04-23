@@ -73,7 +73,7 @@ class GCSStorage(BaseStorage, DataProcessor):
         :param repository: Repository name
         """
         repositories = self.list_repositories()
-        exists = any(d["repository"] == repository for d in repositories)
+        exists = any(d.name == repository for d in repositories)
         if not exists:
             raise Exception('Repository not found')
 
@@ -86,9 +86,7 @@ class GCSStorage(BaseStorage, DataProcessor):
         :param repository: Repository name
         """
         client = self.get_client()
-        bucket = client.bucket(repository)
-        bucket.storage_class = "COLDLINE"
-        client.create_bucket(bucket, location="us")
+        client.create_bucket(repository)
 
         return "Success, {repository} created".format(repository=repository)
     
@@ -145,8 +143,8 @@ class GCSStorage(BaseStorage, DataProcessor):
 
         list_files = []
         client = self.get_client()
-        blobs = client.list_blobs(self.repository, prefix=path)
-
+        blobs = client.get_bucket(self.repository).list_blobs(prefix=path, delimiter='/')
+        
         for blob in blobs:
             list_files.append(blob.name)
 
@@ -164,15 +162,7 @@ class GCSStorage(BaseStorage, DataProcessor):
             client = self.get_client()
             bucket = client.bucket(self.repository)
             blob = bucket.blob(file_path)
-            generation_match_precondition = None
-
-            # Optional: set a generation-match precondition to avoid potential race conditions
-            # and data corruptions. The request to delete is aborted if the object's
-            # generation number does not match your precondition.
-            blob.reload()  # Fetch blob metadata to use in generation_match_precondition.
-            generation_match_precondition = blob.generation
-
-            blob.delete(if_generation_match=generation_match_precondition)
+            blob.delete()
             return "Success, file deleted"
         except Exception as e:
             raise Exception(f'Error while deleting file: {e}')
@@ -194,18 +184,7 @@ class GCSStorage(BaseStorage, DataProcessor):
             source_blob = source_bucket.blob(src_path)
             destination_bucket = client.bucket(dest_repository)
 
-            # Optional: set a generation-match precondition to avoid potential race conditions
-            # and data corruptions. The request is aborted if the object's
-            # generation number does not match your precondition. For a destination
-            # object that does not yet exist, set the if_generation_match precondition to 0.
-            # If the destination object already exists in your bucket, set instead a
-            # generation-match precondition using its generation number.
-            # There is also an `if_source_generation_match` parameter, which is not used in this example.
-            destination_generation_match_precondition = 0
-
-            source_bucket.copy_blob(
-                source_blob, destination_bucket, dest_path, if_generation_match=destination_generation_match_precondition,
-            )
+            source_bucket.copy_blob(source_blob, destination_bucket, dest_path)
             if delete_source:
                 source_bucket.delete_blob(src_path)
 
