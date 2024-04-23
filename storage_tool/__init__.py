@@ -1,5 +1,6 @@
 from storage_tool.azure import AzureAuthorization, AzureStorage
 from storage_tool.s3 import S3Storage, S3Authorization
+from storage_tool.gcs import GCSStorage, GCSAuthorization
 from storage_tool.local import LocalStorage
 
 class Auth:
@@ -14,8 +15,8 @@ class Auth:
             self.authenticator = S3Authorization()
         elif self.storage_type == 'LOCAL':
             self.authenticator = None
-        elif self.storage_type == 'GCP':
-            raise NotImplementedError
+        elif self.storage_type == 'GCS':
+            self.authenticator = GCSAuthorization()
         elif self.storage_type == 'AZURE':
             self.authenticator = AzureAuthorization()
         else:
@@ -34,8 +35,9 @@ class Storage:
         elif self.storage_type == 'LOCAL':
             self.storage = LocalStorage()
 
-        elif self.storage_type == 'GCP':
-            raise NotImplementedError
+        elif self.storage_type == 'GCS':
+            self.storage = GCSStorage()
+
         elif self.storage_type == 'AZURE':
             self.storage = AzureStorage(self.authorization)
         else:
