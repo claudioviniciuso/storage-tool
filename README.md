@@ -51,7 +51,7 @@ A biblioteca planeja integrar com os seguintes ambientes:
 * :white_check_mark: **`Local Storage`** 
 * :white_check_mark: **`S3 Storage`** 
 * :white_check_mark: **`Azure Blob Storage `** 
-* :construction_worker: **`Google Cloud Storage`** 
+* :white_check_mark: **`Google Cloud Storage`** 
 
 
 
