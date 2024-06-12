@@ -108,10 +108,10 @@ class AzureStorage(BaseStorage, DataProcessor):
         Verify and set container
         :param container: container name
         """
-        repositories = self.list_repositories()
-        exists = any(d["container"] == repository for d in repositories)
+        containers = self.list_repositories()
+        exists = any(d["repository"] == repository for d in containers)
         if not exists:
-            self.create_container(repository)
+            self.create_repository(repository)
         self.repository = repository
 
         return "Success, {container} created and defined".format(container=repository)

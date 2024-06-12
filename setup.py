@@ -4,7 +4,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setup(
     name='storage-tool',
-    version='1.2.0',
+    version='1.2.1',
     description='Package for manager files in differents storages',
     author='Claudio Vinicius Oliveira',
     author_email='claudio.datascience@gmail.com',
