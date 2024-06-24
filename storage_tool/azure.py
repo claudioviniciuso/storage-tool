@@ -218,7 +218,7 @@ class AzureStorage(BaseStorage, DataProcessor):
 
             data = self.convert_to_bytes(content, file_path.split('.')[-1].lower())
 
-            blob_client.upload_blob(data, blob_type="BlockBlob")
+            blob_client.upload_blob(data, blob_type="BlockBlob", overwrite=True)
 
             return "Success, file written"
         except Exception as e:
